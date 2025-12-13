@@ -4,6 +4,7 @@ import {User} from "../models/user.models.js";
 import {DeletefromCloudinary, uploadOnCloudinary } from "../../utils/cloudinary.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const registerUser=asynchandler(async(req,res)=>{
     //get detailes
@@ -340,7 +341,7 @@ const DeleteUser=asynchandler(async(req,res)=>{
     const avatarId=req.user.avatar.publicId;
     const coverId=req.user.coverImage.publicId
    try{
-    const user=await User.findByIdAndDelete(req.user?._id);console.log(user);;}catch(err){
+    await User.findByIdAndDelete(req.user?._id);}catch(err){
         throw new ApiError(err)
    }
     await DeletefromCloudinary(avatarId);

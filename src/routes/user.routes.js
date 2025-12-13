@@ -30,5 +30,5 @@ router.route("/avatar").patch(verifyJWT,upload.single("avatar"),UpdateUserAvatar
 router.route("cover-image").patch(verifyJWT,upload.single("coverImage"),UpdateUserCover);
 router.route("/channel/:username").get(verifyJWT,getUserChannelProfile);
 router.route("/history").get(verifyJWT,getWatchHistory);
-router.route("/delete").post(verifyJWT,DeleteUser);
+router.route("/").delete(verifyJWT,DeleteUser);
 export default router; 

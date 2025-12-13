@@ -31,7 +31,7 @@ const DeletefromCloudinary=async (publicid)=>{
         if(!publicid){
             return null
         }
-        const response=await cloudinary.uploader.destroy(publicid,{resource_type:"auto"});
+        const response=await cloudinary.uploader.destroy(publicid);
         console.log("File deleted from cloudinary");
         return response
     }catch(err){
