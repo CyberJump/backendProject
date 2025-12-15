@@ -99,8 +99,21 @@ const deleteVideo = asynchandler(async (req, res) => {
 })
 
 const togglePublishStatus = asynchandler(async (req, res) => {
-    const { videoId } = req.params
-
+    const videoId=req.resource._id;
+    const publishstatus=req.resource.isPublished;
+    let updatedvideo
+    if(publishstatus){
+        updatedvideo=await Video.findByIdAndUpdate(videoId,{
+            $set:{isPublished:false}
+        })
+    }
+    else{
+        updatedvideo=await Video.findByIdAndUpdate(videoId,{
+            $set:{isPublished:true}
+        })
+    }
+    return res.status(200)
+    .json(new ApiResponse(200,updatedvideo,"Publish status changed"));
 })
 
 export {
