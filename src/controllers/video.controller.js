@@ -51,6 +51,9 @@ const publishAVideo = asynchandler(async (req, res) => {
 const getVideoById = asynchandler(async (req, res) => {
     const { videoId } = req.params;
     const video=await Video.findById(videoId);
+    if(!video){
+        throw new ApiError(404,"Video Not found");
+    }
     if(!video.isPublished){
         throw new ApiError(403,"Video Not Published");
     }
@@ -60,6 +63,7 @@ const getVideoById = asynchandler(async (req, res) => {
 
 const updateVideo = asynchandler(async (req, res) => {
     const { videoId } = req.params
+    console.log(req.body)
     const thumbnailpath=req.file?.path;
     const title=req.body?.title;
     const description=req.body?.description;
@@ -67,7 +71,8 @@ const updateVideo = asynchandler(async (req, res) => {
     if(!(updatedthumbnail || title || description)){
         throw new ApiError(409,"Atleast One field required");
     }
-    const oldthumbnailId=req.video.thumbnail.publicId;
+    console.log(req.resource)
+    const oldthumbnailId=req.resource.thumbnail.publicId;
     let updatedvideo;
     if(updatedthumbnail){
         updatedvideo=await Video.findByIdAndUpdate(videoId,{
@@ -84,8 +89,8 @@ const updateVideo = asynchandler(async (req, res) => {
 
 const deleteVideo = asynchandler(async (req, res) => {
     const { videoId } = req.params
-    const thumbnailpublicId=req.user.thumbnail.publicId;
-    const videopublicId=req.user.videoFile.publicId;
+    const thumbnailpublicId=req.resource.thumbnail.publicId;
+    const videopublicId=req.resource.videoFile.publicId;
     await Video.findByIdAndDelete(videoId);
     await DeletefromCloudinary(thumbnailpublicId);
     await DeletefromCloudinary(videopublicId);
@@ -95,6 +100,7 @@ const deleteVideo = asynchandler(async (req, res) => {
 
 const togglePublishStatus = asynchandler(async (req, res) => {
     const { videoId } = req.params
+
 })
 
 export {
