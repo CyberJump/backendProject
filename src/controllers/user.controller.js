@@ -16,10 +16,7 @@ const registerUser=asynchandler(async(req,res)=>{
     //remove password and refresh token from response
     //check user creation
     //return response
-    console.log("Request Body:", req.body);
-    console.log("Request Files:", req.files);
     const {fullname,email,username,password}=req.body;
-
     if([fullname,email,username,password].some((field)=>field?.trim()==="")){
         throw new ApiError(400,"All fields are required");
     }
