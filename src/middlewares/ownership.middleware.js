@@ -7,7 +7,7 @@ import {Subscription} from "../models/subscription.models.js"
 import { asynchandler } from "../../utils/asynchandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 
-export const verifyOwnership = ({Model, resourceId}) => {
+export const verifyOwnership = ({Model, resourceId,owner="owner"}) => {
     return asynchandler(async (req, res, next) => {
         const resourceValue = req.params[resourceId];
         if (!resourceValue) {
@@ -23,7 +23,7 @@ export const verifyOwnership = ({Model, resourceId}) => {
         if (!ownerId.equals(req.user._id)) {
             throw new ApiError(403, "Unauthorized access");
         }
-        
+
         req.resource = resource;
         next();
     });
