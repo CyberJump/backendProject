@@ -8,9 +8,90 @@ import {DeletefromCloudinary, uploadOnCloudinary } from "../../utils/cloudinary.
 
 
 const getAllVideos = asynchandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    //TODO: get all videos based on query, sort, pagination
-})
+  const {
+    page = 1,
+    limit = 10,
+    query,
+    sortBy = "createdAt",
+    sortType = "asc",
+    userId
+  } = req.query;
+
+  const pipeline = [];
+
+  //Search by title
+  if (query) {
+    pipeline.push({
+      $match: {
+        title: { $regex: query, $options: "i" }
+      }
+    });
+  }
+
+  //Filter by owner
+  if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+    pipeline.push({
+      $match: {
+        owner: new mongoose.Types.ObjectId(userId)
+      }
+    });
+  }
+
+  //check sort items 
+  const allowedSortFields = ["createdAt", "views", "duration"];
+  if (!allowedSortFields.includes(sortBy)) {
+    throw new ApiError(400, "Invalid sort field");
+  }
+
+  //Sort
+  pipeline.push({
+    $sort: {
+      [sortBy]: sortType === "asc" ? 1 : -1
+    }
+  });
+
+  //Lookup owner
+  pipeline.push(
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner"
+      }
+    },
+    {
+      $unwind: "$owner"
+    },
+    {
+      $project: {
+        title: 1,
+        duration: 1,
+        views: 1,
+        thumbnail: 1,
+        videoFile: 1,
+        createdAt: 1,
+        owner: {
+          username: "$owner.username",
+          fullname: "$owner.fullname",
+          avatar: "$owner.avatar"
+        }
+      }
+    }
+  );
+
+  const options = {
+    page: Number(page),
+    limit: Number(limit)
+  };
+
+  const aggregate = await Video.aggregate(pipeline);
+  const videos = await Video.aggregatePaginate(aggregate, options);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, videos, "All Videos Fetched Successfully"));
+});
 
 const publishAVideo = asynchandler(async (req, res) => {
     //get the video files and thumbnail 
@@ -57,6 +138,8 @@ const getVideoById = asynchandler(async (req, res) => {
     if(!video.isPublished){
         throw new ApiError(403,"Video Not Published");
     }
+    video.views=video.views+1;
+    await video.save({validateBeforeSave:false})
     return res.status(200).
     json(new ApiResponse(200,video,"Video Fetched Succesfully"));
 })
