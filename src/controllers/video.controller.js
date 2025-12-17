@@ -51,41 +51,40 @@ const getAllVideos = asynchandler(async (req, res) => {
   });
 
   //Lookup owner
-  pipeline.push(
-    {
-      $lookup: {
-        from: "users",
-        localField: "owner",
-        foreignField: "_id",
-        as: "owner"
-      }
-    },
-    {
-      $unwind: "$owner"
-    },
-    {
-      $project: {
-        title: 1,
-        duration: 1,
-        views: 1,
-        thumbnail: 1,
-        videoFile: 1,
-        createdAt: 1,
-        owner: {
-          username: "$owner.username",
-          fullname: "$owner.fullname",
-          avatar: "$owner.avatar"
-        }
+   pipeline.push({
+    $lookup: {
+      from: "users",
+      localField: "owner",
+      foreignField: "_id",
+      as: "owner"
+    }
+    });
+
+    pipeline.push({
+    $unwind: "$owner"
+  });
+    pipeline.push({
+    $project: {
+      title: 1,
+      duration: 1,
+      views: 1,
+      thumbnail: 1,
+      videoFile: 1,
+      createdAt: 1,
+      owner: {
+        username: "$owner.username",
+        fullname: "$owner.fullname",
+        avatar: "$owner.avatar.url"
       }
     }
-  );
+  });
 
   const options = {
     page: Number(page),
     limit: Number(limit)
   };
 
-  const aggregate = await Video.aggregate(pipeline);
+  const aggregate = Video.aggregate(pipeline);
   const videos = await Video.aggregatePaginate(aggregate, options);
 
   return res
