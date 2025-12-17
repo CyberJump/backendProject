@@ -41,8 +41,9 @@ const updateTweet = asynchandler(async (req, res) => {
 const deleteTweet = asynchandler(async (req, res) => {
     //TODO: delete tweet
     const tweetid=req.resource._id;
-    const deleted=await Tweet.findByIdAndDelete(tweetid);
-    return res.status()
+    await Tweet.findByIdAndDelete(tweetid);
+    return res.status(200)
+    .json(new ApiResponse(204,{},"Tweet Deleted Successfully"));
 })
 
 export {
