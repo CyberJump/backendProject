@@ -19,11 +19,13 @@ export const verifyOwnership = ({Model, resourceId,owner="owner"}) => {
             throw new ApiError(404, "Resource not found");
         }
         
-        const ownerId = resource.owner;
+        const ownerId = resource[owner];
+        if (!ownerId) {
+            throw new ApiError(400, `Owner field '${owner}' not found on resource`);
+        }
         if (!ownerId.equals(req.user._id)) {
             throw new ApiError(403, "Unauthorized access");
         }
-
         req.resource = resource;
         next();
     });
