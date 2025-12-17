@@ -3,7 +3,6 @@ import {asynchandler} from "../../utils/asynchandler.js";
 import {ApiResponse} from "../../utils/ApiResponse.js";
 import {ApiError} from "../../utils/ApiError.js";
 import {Video} from "../models/video.models.js";
-import {User} from "../models/user.models.js";
 import {DeletefromCloudinary, uploadOnCloudinary } from "../../utils/cloudinary.js";
 
 

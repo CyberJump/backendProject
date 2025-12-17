@@ -22,20 +22,70 @@ const createTweet = asynchandler(async (req, res) => {
 })
 
 const getUserTweets = asynchandler(async (req, res) => {
-    // TODO: get user tweets
+    // TODO:get user tweets
+    const {page=1,limit=10,sortType="asc",userId}=req.query;
+    const pipeline=[]
+    if(!userId || !isValidObjectId(userId)){
+        throw new ApiError(400,"UserId missing or Invalid User Id");
+    }
+    // matching userId
+    pipeline.push({
+        $match:{
+            owner:new mongoose.Types.ObjectId(userId)
+        }
+    })
+
+    //sort
+    pipeline.push({
+        $sort:{["createdAt"]:sortType==="asc" ? 1:-1}
+    })
+
+    //lookup
+    pipeline.push({
+        $lookup:{
+            from:"users",
+            localField:"owner",
+            foreignField:"_id",
+            as:"owner"
+        }
+    },{
+        $unwind:"$owner"
+    })
+
+    //project
+    pipeline.push({
+        $project:{
+            content:1,
+            fullname:"$owner.fullname",
+            avatar:"$owner.avatar.url",
+            username:"$owner.username",
+            createdAt:1,
+            updatedAt:1
+        }
+    })
+
+    const options={
+        page:Number(page),
+        limit:Number(limit)
+    }
+
+    const aggregate=Tweet.aggregate(pipeline);
+    const tweets= await Tweet.aggregatePaginate(aggregate,options)
+    return res.status(200)
+    .json(new ApiResponse(200,tweets,"Tweets fetched succesfully"));
 })
 
 const updateTweet = asynchandler(async (req, res) => {
     const tweetid=req.resource._id;
+    const tweet=req.resource
     const updatedcontent=req.body?.content;
     if(!updatedcontent){
         throw new ApiError(400,"Content Missing");
     }
-    const updatedtweet=await Tweet.findByIdAndUpdate(tweetid,{
-        $set:{content:updatedcontent}
-    })
+    tweet.content=updatedcontent;
+    const updatedTweet=await tweet.save({validateBeforeSave:false})
     return res.status(200)
-    .json(new ApiResponse(200,updatedtweet,"Tweet updated succesfully"));
+    .json(new ApiResponse(200,updatedTweet,"Tweet updated succesfully"));
 });
 
 const deleteTweet = asynchandler(async (req, res) => {
