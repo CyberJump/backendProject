@@ -4,6 +4,7 @@ import {ApiResponse} from "../../utils/ApiResponse.js";
 import {ApiError} from "../../utils/ApiError.js";
 import {Video} from "../models/video.models.js";
 import {DeletefromCloudinary, uploadOnCloudinary } from "../../utils/cloudinary.js";
+import { User } from "../models/user.models.js";
 
 
 const getAllVideos = asynchandler(async (req, res) => {
@@ -138,6 +139,9 @@ const getVideoById = asynchandler(async (req, res) => {
     }
     video.views=video.views+1;
     await video.save({validateBeforeSave:false})
+    await User.findByIdAndUpdate(req.user._id,{
+      $push:{watchHistory:videoId}
+    })
     return res.status(200).
     json(new ApiResponse(200,video,"Video Fetched Succesfully"));
 })
