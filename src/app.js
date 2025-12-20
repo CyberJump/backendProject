@@ -22,6 +22,7 @@ import subsrouter from "./routes/subscription.routes.js";
 import playlistrouter from "./routes/playlist.routes.js";
 import healthrouter from "./routes/healthcheck.routes.js";
 import likesrouter from "./routes/like.routes.js";
+import commentrouter from "./routes/comment.routes.js";
 // //routes declaration
 app.use("/api/v1/users",userRouter);
 app.use("/api/v1/videos/",videoRouter);
@@ -29,7 +30,8 @@ app.use("/api/v1/tweets/",tweetRouter);
 app.use("/api/v1/subscriptions/",subsrouter);
 app.use("/api/v1/playlists/",playlistrouter);
 app.use("/api/v1/health",healthrouter);
-app.use("/api/v1/likes/",likesrouter);
+app.use("/api/v1/likes",likesrouter);
+app.use("/api/v1/comments",commentrouter);
 export default app;
 
 
